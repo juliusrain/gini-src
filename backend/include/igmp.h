@@ -1,6 +1,5 @@
-<<<<<<< HEAD
 #ifndef __IGMP_H__
-#define __IGMP_H_
+#define __IGMP_H__
 
 void IGMPProcessPacket();
 
