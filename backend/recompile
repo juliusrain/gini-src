@@ -1,0 +1,12 @@
+#!/bin/bash
+
+echo "Make sure that the gBuilder topology has been stopped!"
+read
+
+echo ""
+echo "running scons..."
+scons
+
+echo ""
+echo "cp build/release/grouter/grouter ~/gini/bin/grouter"
+cp build/release/grouter/grouter ~/gini/bin/grouter
