@@ -1,6 +1,8 @@
+<<<<<<< HEAD
 #ifndef __IGMP_H__
 #define __IGMP_H_
 
+void IGMPProcessPacket();
 
 typedef struct _igmp_pkt_hdr_t {
     unsigned char VerType; //00010001(17) | 00010010(18) 4-bit - 4-bit

@@ -304,16 +304,26 @@ int IPProcessMyPacket(gpacket_t *in_pkt)
 	{
 		// Is packet ICMP? send it to the ICMP module
 		// further processing with appropriate type code
-
 		if (ip_pkt->ip_prot == ICMP_PROTOCOL)
+		{
 			ICMPProcessPacket(in_pkt);
-		return EXIT_SUCCESS;
+			return EXIT_SUCCESS;
+		}
+		
+		// Is packet IGMP? send it to the IGMP module
+		if (ip_pkt->ip_prot == IGMP_PROTOCOL)
+		{
+			IGMPProcessPacket(in_pkt);
+			return EXIT_SUCCESS;
+		}
 
 		// Is packet UDP/TCP (only UDP implemented now)
 		// May be we can deal with other connectionless protocols as well.
 		if (ip_pkt->ip_prot == UDP_PROTOCOL)
+		{
 			UDPProcess(in_pkt);
-		return EXIT_SUCCESS;
+			return EXIT_SUCCESS;
+		}
 	}
 	return EXIT_FAILURE;
 }

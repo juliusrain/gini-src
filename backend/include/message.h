@@ -65,6 +65,7 @@ int printEthernetHeader(gpacket_t *msg);
 int printIPPacket(gpacket_t *msg);
 void printARPPacket(gpacket_t *msg);
 void printICMPPacket(gpacket_t *msg);
+void printIGMPPacket(gpacket_t *msg);
 void printUDPPacket(gpacket_t *msg);
 void printTCPPacket(gpacket_t *msg);
 

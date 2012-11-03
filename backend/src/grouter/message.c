@@ -75,6 +75,9 @@ void printGPktPayload(gpacket_t *msg, int level)
 		case ICMP_PROTOCOL:
 			printICMPPacket(msg);
 			break;
+		case IGMP_PROTOCOL:
+			printIGMPPacket(msg);
+			break;
 		case UDP_PROTOCOL:
 			printUDPPacket(msg);
 		case TCP_PROTOCOL:
@@ -181,6 +184,13 @@ void printICMPPacket(gpacket_t *msg)
 {
 
 	printf("\n ICMP PACKET display NOT YET IMPLEMENTED !! \n");
+}
+
+
+void printIGMPPacket(gpacket_t *msg)
+{
+
+	printf("\n IGMP PACKET display NOT YET IMPLEMENTED !! \n");
 }
 
 
