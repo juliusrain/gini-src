@@ -13,6 +13,7 @@
 #include "ip.h"
 #include "fragment.h"
 #include "packetcore.h"
+#include "igmp.h"
 #include <stdlib.h>
 #include <slack/err.h>
 #include <netinet/in.h>

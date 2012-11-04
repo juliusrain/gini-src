@@ -1,7 +1,7 @@
 
 #include "igmp.h"
 
-void IGMPProcessPacket()
+void IGMPProcessPacket(gpacket_t *in_pkt)
 {
 
 }
