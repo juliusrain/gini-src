@@ -6,7 +6,7 @@
 
 void IGMPProcessPacket(gpacket_t *in_pkt)
 {
-
+    printf("PROCESSING IGMP PACKET YAAAAY");
 }
 
 //TODO: modify gpacket fields (model after ICMP example)
