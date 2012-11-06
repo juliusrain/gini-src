@@ -50,12 +50,27 @@ int makePIDFile(char *rname, char rpath[]);
 void shutdownRouter();
 int isPIDAlive(int pid);
 
+void haha(){
+	int count = 100, i;
+	for(i = 0; i < count; i++){
+		sleep(3);
+		printf("what? %d\n", i);
+	}
+}
 
 int main(int ac, char *av[])
 {
 	char rpath[MAX_NAME_LEN];
 	int status, *jstatus;
 	simplequeue_t *outputQ, *workQ, *qtoa;
+	pthread_t IGMP_broadcast_thread;
+
+	//int child = fork();
+	//if(child){
+	//	haha();
+	//	return 0;
+	//}
+	pthread_create(&IGMP_broadcast_thread, NULL, haha, NULL);
 
 	// setup the program properties
 	setupProgram(ac, av);
@@ -94,10 +109,10 @@ int main(int ac, char *av[])
 	// start the CLI..
 	CLIInit(&(rconfig));
 
-
 	wait4thread(rconfig.scheduler);
 	wait4thread(rconfig.worker);
 	wait4thread(rconfig.ghandler);
+	wait4thread(IGMP_broadcast_thread);
 }
 
 
