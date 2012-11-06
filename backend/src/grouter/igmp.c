@@ -18,7 +18,9 @@ void IGMPBroadcast(){
 	//ip_packet_t *ipkt = (ip_packet_t *)(out_pkt->data.data);
 	for(i = 0; i < count; i++){
 		sleep(3);
-		igmp_packet->VerType = 17;
+		//igmp_packet->VerType = 17;
+		igmp_packet->version = 1;
+		igmp_packet->type = 1;
 		//255.0.0.36
 		//11100001 00000000 00000000 0100100
 		//1887436836
@@ -28,7 +30,7 @@ void IGMPBroadcast(){
 		igmp_packet->grp_addr[1] = 0;
 		igmp_packet->grp_addr[0] = 36;
 		printf("what? %d\n", i);
-		printf("igmp packet %d, %s\n", (igmp_packet->VerType), IP2Dot(malloc(16*8), igmp_packet->grp_addr));
+		printf("igmp packet %d, %s\n", (igmp_packet->type), IP2Dot(malloc(16*8), igmp_packet->grp_addr));
 		printGPktFrame(out_gpacket, "IGMPBroadcast");
 	}
 }
