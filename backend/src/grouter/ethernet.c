@@ -97,9 +97,26 @@ void* fromEthernetDev(void *arg)
 			return NULL;
 		}
 
+
 		bzero(in_pkt, sizeof(gpacket_t));
 		vpl_recvfrom(iface->vpl_data, &(in_pkt->data), sizeof(pkt_data_t));
 		pthread_testcancel();
+
+        //check if packet has a multicast mac address. if so, allow router to accept
+        if(in_pkt->data.header.dst[0] == 1) {
+            uchar buffer[6];
+            verbose(1, "is mcast MAC: %s ", MAC2Colon(buffer, in_pkt->data.header.dst));
+
+
+            COPY_MAC(in_pkt->data.header.dst, iface->mac_addr);
+            verbose(1, "set packet mac address to: %s", MAC2Colon(buffer, in_pkt->data.header.dst));
+
+            printGPacket(in_pkt, 3, "mcast packet");
+
+        } else {
+            printGPacket(in_pkt, 3, "else"); 
+        }
+
 		// check whether the incoming packet is a layer 2 broadcast or
 		// meant for this node... otherwise should be thrown..
 		// TODO: fix for promiscuous mode packet snooping.
@@ -128,4 +145,3 @@ void* fromEthernetDev(void *arg)
 		enqueuePacket(pcore, in_pkt, sizeof(gpacket_t));
 	}
 }
-
