@@ -16,6 +16,7 @@
 #include "classifier.h"
 #include "filter.h"
 #include <pthread.h>
+#include "igmp.h"
 
 router_config rconfig = {.router_name=NULL, .gini_home=NULL, .cli_flag=0, .config_file=NULL, .config_dir=NULL, .ghandler=0, .clihandler= 0, .scheduler=0, .worker=0, .schedcycle=10000};
 pktcore_t *pcore;
@@ -50,12 +51,15 @@ int makePIDFile(char *rname, char rpath[]);
 void shutdownRouter();
 int isPIDAlive(int pid);
 
-
 int main(int ac, char *av[])
 {
 	char rpath[MAX_NAME_LEN];
 	int status, *jstatus;
 	simplequeue_t *outputQ, *workQ, *qtoa;
+	pthread_t IGMP_broadcast_thread;
+
+	// create separate thread for broadcasting IGMP group query messages
+	pthread_create(&IGMP_broadcast_thread, NULL, IGMPBroadcast, NULL);
 
 	// setup the program properties
 	setupProgram(ac, av);
@@ -94,10 +98,10 @@ int main(int ac, char *av[])
 	// start the CLI..
 	CLIInit(&(rconfig));
 
-
 	wait4thread(rconfig.scheduler);
 	wait4thread(rconfig.worker);
 	wait4thread(rconfig.ghandler);
+	wait4thread(IGMP_broadcast_thread);
 }
 
 
