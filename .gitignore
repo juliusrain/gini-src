@@ -3,3 +3,5 @@
 *.swp
 *~
 config.log
+*.dblite
+.sconf_temp
