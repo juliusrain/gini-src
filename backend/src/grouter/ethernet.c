@@ -84,6 +84,7 @@ void* fromEthernetDev(void *arg)
 	interface_t *iface = (interface_t *) arg;
 	interface_array_t *iarr = (interface_array_t *)iface->iarray;
 	uchar bcast_mac[] = MAC_BCAST_ADDR;
+	uchar mcast_first_byte[] = MAC_MCAST_FIRST_BYTE;
 
 	gpacket_t *in_pkt;
 
@@ -121,7 +122,8 @@ void* fromEthernetDev(void *arg)
 		// meant for this node... otherwise should be thrown..
 		// TODO: fix for promiscuous mode packet snooping.
 		if ((COMPARE_MAC(in_pkt->data.header.dst, iface->mac_addr) != 0) &&
-			(COMPARE_MAC(in_pkt->data.header.dst, bcast_mac) != 0))
+			(COMPARE_MAC(in_pkt->data.header.dst, bcast_mac) != 0) &&
+			IS_MCAST_MAC(in_pkt->data.header.dst, mcast_first_byte) != 0)
 		{
 			verbose(1, "[fromEthernetDev]:: Packet dropped .. not for this router!? ");
 			free(in_pkt);

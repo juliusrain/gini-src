@@ -63,6 +63,8 @@
 #define COPY_IP(DST, SRC)           ( memcpy(DST, SRC, 4) )
 #define COMPARE_MAC(X, Y)           ( memcmp(X, Y, 6) )
 #define COMPARE_IP(X, Y)            ( memcmp(X, Y, 4) )
+#define IS_MCAST_MAC(X, Y)			( memcmp(X, Y, 1) )
+#define MAC_MCAST_FIRST_BYTE		{0x01}
 #define MAC_BCAST_ADDR              {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 #define IP_BCAST_ADDR               {0xFF, 0xFF, 0xFF, 0xFF}
 
