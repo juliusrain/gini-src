@@ -1,8 +1,9 @@
 
-#include "igmp.h"
 #include "grouter.h"
-#include "protocols.h"
 #include "message.h"
+#include "ip.h"
+#include "protocols.h"
+#include "igmp.h"
 #include <stdio.h>
 
 void IGMPProcessPacket(gpacket_t *in_pkt)
@@ -14,23 +15,22 @@ void IGMPProcessPacket(gpacket_t *in_pkt)
     switch (igmp_hdr->type) {
     
     case IGMP_REPORT:
-        IGMP
         break;
     
     case IGMP_QUERY:
-        IGMP
-    
+
+    	break;
     }
 }
 
 //TODO: modify gpacket fields (model after ICMP example)
-void IGMPBroadcast(){
+void IGMPBroadcast() {
 	int count = 100, i;
 	gpacket_t* out_gpacket = (gpacket_t*) malloc(sizeof(gpacket_t));
 	//igmp_pkt_hdr_t* igmp_packet = (igmp_pkt_hdr_t *) malloc(sizeof(igmp_pkt_hdr_t));
 	igmp_pkt_hdr_t* igmp_packet = (igmp_pkt_hdr_t *) out_gpacket->data.data;
 	//ip_packet_t *ipkt = (ip_packet_t *)(out_pkt->data.data);
-	for(i = 0; i < count; i++){
+	for(i = 0; i < count; i++) {
 		sleep(3);
 		//igmp_packet->VerType = 17;
 		igmp_packet->version = 1;
@@ -43,9 +43,9 @@ void IGMPBroadcast(){
 		igmp_packet->grp_addr[2] = 0;
 		igmp_packet->grp_addr[1] = 0;
 		igmp_packet->grp_addr[0] = 36;
-		printf("what? %d\n", i);
-		printf("igmp packet %d, %s\n", (igmp_packet->type), IP2Dot(malloc(16*8), igmp_packet->grp_addr));
-		printGPktFrame(out_gpacket, "IGMPBroadcast");
+//		printf("what? %d\n", i);
+//		printf("igmp packet %d, %s\n", (igmp_packet->type), IP2Dot(malloc(16*8), igmp_packet->grp_addr));
+//		printGPktFrame(out_gpacket, "IGMPBroadcast");
 	}
 }
 

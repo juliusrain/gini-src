@@ -52,9 +52,12 @@ void IPIncomingPacket(gpacket_t *in_pkt)
         ip_packet_t *ip_pkt = (ip_packet_t *)&in_pkt->data.data;
 	uchar bcast_ip[] = IP_BCAST_ADDR;
 
-    if(isMCastIP(ip_pkt->ip_dst) == 0) {
-        printf("is an mcast ip");
-    }
+//    if(isMCastIP(ip_pkt->ip_dst) == 0) {
+//        printf("is an mcast ip");
+//    }
+
+	printGPacket(in_pkt, 3, "bvfhjdklvhfk");
+
 
 	// Is this IP packet for me??
 	if (IPCheckPacket4Me(in_pkt))
@@ -67,9 +70,13 @@ void IPIncomingPacket(gpacket_t *in_pkt)
 		verbose(2, "[IPIncomingPacket]:: not repeat broadcast (final destination %s), packet thrown",
 		       IP2Dot(tmpbuf, gNtohl((tmpbuf+20), ip_pkt->ip_dst)));
 		IPProcessBcastPacket(in_pkt);
-//    } else if (isMCastIP(ip_pkt->ip_dst) == 0)
+	} else if (isMCastIP(ip_pkt->ip_dst) == 0)
+	{
+		//IGMP packets come in with an IP protocol of 17... (UDP)
+		//Manually change to 2...?
+		verbose(2, "[IPIncomingPacket]:: got multicast IP packet");
+		IPProcessMyPacket(in_pkt);
 
-//    {
 	} else
 	{
 		// Destinated to someone else
@@ -327,7 +334,8 @@ int IPProcessMyPacket(gpacket_t *in_pkt)
 		// Is packet IGMP? send it to the IGMP module
 		if (ip_pkt->ip_prot == IGMP_PROTOCOL)
 		{
-			IGMPProcessPacket(in_pkt);
+			//IGMPProcessPacket(in_pkt);
+			verbose(1, "PROCESSING IGMP PACKET YAAAAAAAY");
 			return EXIT_SUCCESS;
 		}
 
