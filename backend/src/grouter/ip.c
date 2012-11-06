@@ -218,7 +218,7 @@ int IPCheck4Errors(gpacket_t *in_pkt)
 
 	// Decrement TTL, if TTL <= 0, send to ICMP module with TTL-expired command
 	// return EXIT_FAILURE
-	if (--ip_pkt->ip_ttl <= 0)
+	if (ip_pkt->ip_ttl-- <= 0)
 	{
 		verbose(2, "[processIPErrors]:: TTL expired on packet from %s",
 		       IP2Dot(tmpbuf, gNtohl((tmpbuf+20), ip_pkt->ip_src)));
