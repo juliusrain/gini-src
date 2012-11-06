@@ -24,12 +24,19 @@ mtu_entry_t MTU_tbl[MAX_MTU];		        // MTU table
 
 extern pktcore_t *pcore;
 
+
 void IPInit()
 {
 	RouteTableInit(route_tbl);
 	MTUTableInit(MTU_tbl);
 }
 
+int isMCastIP(uchar ip_addr[]) {
+    if(ip_addr[0] >= 224 && ip_addr[0] <= 239) {
+        return 0; //true
+    }
+    return 1; //false
+}
 
 /*
  * IPIncomingPacket: Process incoming IP packet.
@@ -45,6 +52,10 @@ void IPIncomingPacket(gpacket_t *in_pkt)
         ip_packet_t *ip_pkt = (ip_packet_t *)&in_pkt->data.data;
 	uchar bcast_ip[] = IP_BCAST_ADDR;
 
+    if(isMCastIP(ip_pkt->ip_dst) == 0) {
+        printf("is an mcast ip");
+    }
+
 	// Is this IP packet for me??
 	if (IPCheckPacket4Me(in_pkt))
 	{
@@ -56,6 +67,9 @@ void IPIncomingPacket(gpacket_t *in_pkt)
 		verbose(2, "[IPIncomingPacket]:: not repeat broadcast (final destination %s), packet thrown",
 		       IP2Dot(tmpbuf, gNtohl((tmpbuf+20), ip_pkt->ip_dst)));
 		IPProcessBcastPacket(in_pkt);
+//    } else if (isMCastIP(ip_pkt->ip_dst) == 0)
+
+//    {
 	} else
 	{
 		// Destinated to someone else
@@ -63,7 +77,6 @@ void IPIncomingPacket(gpacket_t *in_pkt)
 		IPProcessForwardingPacket(in_pkt);
 	}
 }
-
 
 
 /*
@@ -509,4 +522,5 @@ int isInSameNetwork(uchar *ip_addr1, uchar *ip_addr2)
 
 	return EXIT_FAILURE;
 }
+
 
