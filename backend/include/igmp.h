@@ -3,6 +3,10 @@
 
 #include "message.h"
 
+#define IGMP_REPORT 2
+#define IGMP_QUERY 1
+
+
 void IGMPProcessPacket(gpacket_t *in_pkt);
 void IGMPBroadcast();
 
