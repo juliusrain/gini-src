@@ -334,8 +334,9 @@ int IPProcessMyPacket(gpacket_t *in_pkt)
 		// Is packet IGMP? send it to the IGMP module
 		if (ip_pkt->ip_prot == IGMP_PROTOCOL)
 		{
-			//IGMPProcessPacket(in_pkt);
+			
 			verbose(1, "PROCESSING IGMP PACKET YAAAAAAAY");
+			IGMPProcessPacket(in_pkt);
 			return EXIT_SUCCESS;
 		}
 
