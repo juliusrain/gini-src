@@ -16,7 +16,7 @@ typedef struct _igmp_pkt_hdr_t {
     unsigned int version:4;
     unsigned int type:4;
     unsigned char unused; //8-bit
-    unsigned short checksum; //8-bit
+    unsigned short checksum; //16-bit
     unsigned char grp_addr[4]; //multicast group address 32-bit
 } igmp_pkt_hdr_t;
 
