@@ -19,6 +19,7 @@
 #include <netinet/in.h>
 #include <string.h>
 
+igmp_table_entry_t *igmp_route_tbl = NULL;
 route_entry_t route_tbl[MAX_ROUTES];       	// routing table
 mtu_entry_t MTU_tbl[MAX_MTU];		        // MTU table
 
@@ -30,6 +31,7 @@ void IPInit()
 	RouteTableInit(route_tbl);
 	MTUTableInit(MTU_tbl);
 }
+
 
 int isMCastIP(uchar ip_addr[]) {
     if(ip_addr[0] >= 224 && ip_addr[0] <= 239) {
@@ -73,9 +75,8 @@ void IPIncomingPacket(gpacket_t *in_pkt)
 	} else if (isMCastIP(ip_pkt->ip_dst) == 0)
 	{
 		//IGMP packets come in with an IP protocol of 17... (UDP)
-		//Manually change to 2...?
 		verbose(2, "[IPIncomingPacket]:: got multicast IP packet");
-		IPProcessMyPacket(in_pkt);
+        IPProcessMyPacket(in_pkt);
 
 	} else
 	{
@@ -116,6 +117,37 @@ int IPCheckPacket4Me(gpacket_t *in_pkt)
 		return FALSE;
 }
 
+
+/*
+ * Process multicast packet
+ *
+ */
+//int IPProcessMcastPacket(gpacket_t *in_pkt) {
+//    verbose(1, "PROCESSING IGMP PACKET YAAAAAAAY, not really");
+//
+//    Map *map;
+//    if(!(map = map_create(free))) {
+//        verbose(1, "not good");
+//    }
+//
+//    map_add(map, "blah1", "b1");
+//    map_add(map, "blah2", "b2");
+//
+//    Mapper *mapper;
+//    if(!(mapper = mapper_create(igmp_route_tbl))) {
+//       verbose(1, "something bad happened...");
+//    }
+//    
+//    while(mapper_has_next(mapper) == 1) {
+//        const Mapping *mapping = mapper_next_mapping(mapper);
+//        verbose(1, "hdkjsl %s -> %s\n", (char *)mapping_key(mapping), (char *)mapping_value(mapping));
+//    }
+//
+//    mapper_destroy(&mapper);
+//
+//    IGMPProcessPacket(in_pkt);
+//    return EXIT_SUCCESS;
+//}
 
 
 /*
@@ -334,7 +366,6 @@ int IPProcessMyPacket(gpacket_t *in_pkt)
 		// Is packet IGMP? send it to the IGMP module
 		if (ip_pkt->ip_prot == IGMP_PROTOCOL)
 		{
-			
 			verbose(1, "PROCESSING IGMP PACKET YAAAAAAAY");
 			IGMPProcessPacket(in_pkt);
 			return EXIT_SUCCESS;
@@ -359,6 +390,79 @@ int IPProcessMyPacket(gpacket_t *in_pkt)
 int UDPProcess(gpacket_t *in_pkt)
 {
 	verbose(2, "[UDPProcess]:: packet received for processing.. NOT YET IMPLEMENTED!! ");
+
+	ip_packet_t *ip_pkt = (ip_packet_t *)in_pkt->data.data;
+
+    //process udp packet meant for multicast sts
+    if(isMCastIP(ip_pkt->ip_dst) == 0) {
+        verbose(1, "[UDPProcess]:: Processing UDP packet with multicast information.");
+
+        //query table, generate packets to send to interested hosts
+
+
+
+        uchar addr[4];
+        addr[0] = 1;
+        addr[1] = 2;
+        addr[2] = 3;
+        addr[3] = 4;
+
+        uchar host_addr[4];
+        host_addr[0] = 5;
+        host_addr[1] = 6;
+        host_addr[2] = 7;
+        host_addr[3] = 8;
+
+	igmp_table_entry_t *t_entry = (igmp_table_entry_t *)malloc(sizeof(igmp_table_entry_t));
+	memcpy(t_entry->group_addr, addr, sizeof(t_entry->group_addr));
+
+//	igmp_host_entry_t *h_entry = (igmp_host_entry_t *)malloc(sizeof(igmp_host_entry_t));
+//	memcpy(h_entry->host_addr, host_addr, sizeof(h_entry->host_addr));
+
+	
+	igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry);
+	
+
+	char buffer[MAX_TMPBUF_LEN];
+	//verbose(1, "gr addr %s\n", IP2Dot(buffer, igmp_route_tbl->group_addr));
+
+//	printIGMPRouteTable(igmp_route_tbl);
+        
+
+        //no entry found for target mc address so create table entry
+//        if(map_get(igmp_route_tbl, addr) == NULL) {
+//            verbose(1, "no entry");
+//            List *hosts_list;
+//            //create empty list for new entry
+//            if(!(hosts_list = list_create(free))) {
+//                verbose(1, "error creating list of hosts");
+//            }
+//            //add entry to table with empty list as value
+//            map_add(igmp_route_tbl, addr, hosts_list);
+//            //check if entry was successfully added
+//            if(map_get(igmp_route_tbl, addr) != NULL) {
+//                verbose(1, "found something");
+//                //add random entry in list for testing
+//                list_append(hosts_list, host_addr);
+//            }
+//
+//            Lister *lister;
+//            if(!(lister = lister_create(hosts_list))) {
+//                verbose(1, "error making lister");
+//            }
+//            while(lister_has_next(lister) == 1) {
+//                verbose(1, "bjkdfl;jgkfl %s", (uchar)list_next(hosts_list));
+//            }
+//            lister_destroy(&lister);
+//
+//        } else {
+//            List *hosts = map_get(igmp_route_tbl, addr);
+//
+//        }
+
+
+    }
+
 	return EXIT_SUCCESS;
 }
 
