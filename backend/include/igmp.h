@@ -20,7 +20,7 @@
 
 
 typedef struct _igmp_host_entry_t {
-    unsigned char ip_addr[4];
+    unsigned char host_addr[4];
     struct igmp_host_entry_t *next;
 } igmp_host_entry_t;
 
@@ -42,6 +42,7 @@ typedef struct _igmp_pkt_hdr_t {
 igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *new_entry);
 igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[], igmp_host_entry_t *new_host);
 igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]);
+void printIGMPRouteTable(igmp_table_entry_t *tbl_head);
 void IGMPProcessPacket(gpacket_t *in_pkt);
 void IGMPBroadcast();
 void IGMPSendQueryMessage(uchar *dst_ip, uchar *grp_ip, int size);

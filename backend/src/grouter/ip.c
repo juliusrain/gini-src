@@ -399,6 +399,8 @@ int UDPProcess(gpacket_t *in_pkt)
 
         //query table, generate packets to send to interested hosts
 
+
+
         uchar addr[4];
         addr[0] = 1;
         addr[1] = 2;
@@ -411,10 +413,20 @@ int UDPProcess(gpacket_t *in_pkt)
         host_addr[2] = 7;
         host_addr[3] = 8;
 
-        int i;
-        for(i = 0; i < 4; i++) {
-            printf("%d", host_addr[i]);
-        }
+	igmp_table_entry_t *t_entry = (igmp_table_entry_t *)malloc(sizeof(igmp_table_entry_t));
+	memcpy(t_entry->group_addr, addr, sizeof(t_entry->group_addr));
+
+//	igmp_host_entry_t *h_entry = (igmp_host_entry_t *)malloc(sizeof(igmp_host_entry_t));
+//	memcpy(h_entry->host_addr, host_addr, sizeof(h_entry->host_addr));
+
+	
+	igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry);
+	
+
+	char buffer[MAX_TMPBUF_LEN];
+	//verbose(1, "gr addr %s\n", IP2Dot(buffer, igmp_route_tbl->group_addr));
+
+//	printIGMPRouteTable(igmp_route_tbl);
         
 
         //no entry found for target mc address so create table entry
