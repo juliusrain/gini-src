@@ -13,9 +13,6 @@
 #define __IGMP_H__
 
 #include "message.h"
-#include <slack/std.h>
-#include <slack/map.h>
-#include <slack/list.h>
 
 
 #define IGMP_REPORT 2
@@ -24,12 +21,12 @@
 
 typedef struct _igmp_host_entry_t {
     unsigned char ip_addr[4];
-    igmp_host_entry_t *next;
+    struct igmp_host_entry_t *next;
 } igmp_host_entry_t;
 
 typedef struct _igmp_table_entry_t {
     unsigned char group_addr[4];
-    igmp_table_entry_t *next;
+    struct igmp_table_entry_t *next;
     igmp_host_entry_t *hosts;
 } igmp_table_entry_t;
 
@@ -38,14 +35,15 @@ typedef struct _igmp_pkt_hdr_t {
     unsigned int version:4;
     unsigned int type:4;
     unsigned char unused; //8-bit
-    unsigned short checksum; //8-bit
+    unsigned short checksum; //16-bit
     unsigned char grp_addr[4]; //multicast group address 32-bit
 } igmp_pkt_hdr_t;
 
 igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *new_entry);
 igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[], igmp_host_entry_t *new_host);
-igmp_host_entry *getHostsInGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]);
+igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]);
 void IGMPProcessPacket(gpacket_t *in_pkt);
 void IGMPBroadcast();
+void IGMPSendQueryMessage(uchar *dst_ip, uchar *grp_ip, int size);
 
 #endif

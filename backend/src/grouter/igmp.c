@@ -26,11 +26,11 @@ igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
     }
 
     while(iterator->next != NULL) {
-        iterator = iterator->next;
+        iterator = (igmp_table_entry_t *)(iterator->next);
     }
     iterator->next = new_entry;
 
-    return iterator->next;
+    return (igmp_table_entry_t *)iterator->next;
 }
 
 igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, uchar gr_addr[], igmp_host_entry_t *new_host) {
@@ -42,7 +42,7 @@ igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, uchar gr_addr[],
         if(memcmp(t_iterator->group_addr, gr_addr, sizeof(t_iterator->group_addr)) == 0) {
             break;
         }
-        t_iterator = t_iterator->next;
+        t_iterator = (igmp_table_entry_t *)(t_iterator->next);
         //target group doesn't exist, so return null;
         if(t_iterator == NULL) return NULL;
     }
@@ -55,14 +55,14 @@ igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, uchar gr_addr[],
     }
 
     while(hosts->next != NULL) {
-        hosts = hosts->next;
+        hosts = (igmp_host_entry_t *)(hosts->next);
     }
     hosts->next = new_host;
 
-    return hosts_next;
+    return (igmp_host_entry_t *)hosts->next;
 }
 
-igmp_host_entry *getHostsInGroup(igmp_table_entry_t *tbl_head, uchar gr_addr[]) {
+igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, uchar gr_addr[]) {
     igmp_table_entry_t *iterator;
 
     iterator = tbl_head;
@@ -99,6 +99,9 @@ void IGMPBroadcast() {
 	gpacket_t* out_gpacket = (gpacket_t*) malloc(sizeof(gpacket_t));
 	//igmp_pkt_hdr_t* igmp_packet = (igmp_pkt_hdr_t *) malloc(sizeof(igmp_pkt_hdr_t));
 	igmp_pkt_hdr_t* igmp_packet = (igmp_pkt_hdr_t *) out_gpacket->data.data;
+	uchar ip[4];
+	char *dot = "192.168.2.3";
+	Dot2IP(dot, ip);
 	//ip_packet_t *ipkt = (ip_packet_t *)(out_pkt->data.data);
 	for(i = 0; i < count; i++) {
 		sleep(3);
@@ -113,9 +116,41 @@ void IGMPBroadcast() {
 		igmp_packet->grp_addr[2] = 0;
 		igmp_packet->grp_addr[1] = 0;
 		igmp_packet->grp_addr[0] = 36;
-//		printf("what? %d\n", i);
+		printf("size: %d, %d, %d\n", sizeof(igmp_packet->unused), sizeof(igmp_packet->checksum), sizeof(igmp_packet->grp_addr));
+		IGMPSendQueryMessage(ip, igmp_packet->grp_addr, 8);
+		printf("what? %d\n", i);
 //		printf("igmp packet %d, %s\n", (igmp_packet->type), IP2Dot(malloc(16*8), igmp_packet->grp_addr));
 //		printGPktFrame(out_gpacket, "IGMPBroadcast");
 	}
 }
 
+
+void IGMPSendQueryMessage(uchar *dst_ip, uchar *grp_ip, int size)
+{
+	gpacket_t *out_pkt = (gpacket_t *) malloc(sizeof(gpacket_t));
+	ip_packet_t *ipkt = (ip_packet_t *)(out_pkt->data.data);
+	ipkt->ip_hdr_len = 5;
+	igmp_pkt_hdr_t *igmphdr = (igmp_pkt_hdr_t *)((uchar *)ipkt + ipkt->ip_hdr_len*4);
+	ushort cksum;
+	char tmpbuf[64];
+	
+	igmphdr->version = 1;
+	igmphdr->type = IGMP_QUERY;
+	igmphdr->unused = 0;
+	igmphdr->checksum = 0;
+	igmphdr->grp_addr[0] = 225;
+	igmphdr->grp_addr[1] = 0;
+	igmphdr->grp_addr[2] = 0;
+	igmphdr->grp_addr[3] = 36;
+
+	cksum = checksum((uchar *)igmphdr, size/2);  // size = payload (given) + igmp_header
+	igmphdr->checksum = htons(cksum);
+
+	verbose(2, "[sendIGMPQueryMessage]:: Sending... IGMP query to  %s", IP2Dot(tmpbuf, dst_ip));
+
+	// send the message to the IP routine for further processing
+	// the IP should create new header .. provide needed information from here.
+	// tag the message as new packet
+	// IPOutgoingPacket(/context, packet, IPaddr, size, newflag, source)
+	IPOutgoingPacket(out_pkt, dst_ip, size, 1, IGMP_PROTOCOL);
+}

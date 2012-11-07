@@ -19,7 +19,7 @@
 #include <netinet/in.h>
 #include <string.h>
 
-igmp_table_entry *igmp_route_tbl = NULL;
+igmp_table_entry_t *igmp_route_tbl = NULL;
 route_entry_t route_tbl[MAX_ROUTES];       	// routing table
 mtu_entry_t MTU_tbl[MAX_MTU];		        // MTU table
 
@@ -415,9 +415,6 @@ int UDPProcess(gpacket_t *in_pkt)
         for(i = 0; i < 4; i++) {
             printf("%d", host_addr[i]);
         }
-        
-        igmp
-
         
 
         //no entry found for target mc address so create table entry
