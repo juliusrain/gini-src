@@ -46,7 +46,8 @@ void IGMPBroadcast() {
 		igmp_packet->grp_addr[2] = 0;
 		igmp_packet->grp_addr[1] = 0;
 		igmp_packet->grp_addr[0] = 36;
-		IGMPSendQueryMessage(ip, igmp_packet->grp_addr, 1);
+		printf("size: %d, %d, %d\n", sizeof(igmp_packet->unused), sizeof(igmp_packet->checksum), sizeof(igmp_packet->grp_addr));
+		IGMPSendQueryMessage(ip, igmp_packet->grp_addr, 8);
 		printf("what? %d\n", i);
 //		printf("igmp packet %d, %s\n", (igmp_packet->type), IP2Dot(malloc(16*8), igmp_packet->grp_addr));
 //		printGPktFrame(out_gpacket, "IGMPBroadcast");
@@ -58,15 +59,19 @@ void IGMPSendQueryMessage(uchar *dst_ip, uchar *grp_ip, int size)
 {
 	gpacket_t *out_pkt = (gpacket_t *) malloc(sizeof(gpacket_t));
 	ip_packet_t *ipkt = (ip_packet_t *)(out_pkt->data.data);
-	ipkt->ip_hdr_len = 6;
+	ipkt->ip_hdr_len = 5;
 	igmp_pkt_hdr_t *igmphdr = (igmp_pkt_hdr_t *)((uchar *)ipkt + ipkt->ip_hdr_len*4);
 	ushort cksum;
 	char tmpbuf[64];
 	
 	igmphdr->version = 1;
 	igmphdr->type = IGMP_QUERY;
+	igmphdr->unused = 0;
 	igmphdr->checksum = 0;
-	memcpy(igmphdr->grp_addr, &grp_ip, sizeof(igmphdr->grp_addr));
+	igmphdr->grp_addr[0] = 225;
+	igmphdr->grp_addr[1] = 0;
+	igmphdr->grp_addr[2] = 0;
+	igmphdr->grp_addr[3] = 36;
 
 	cksum = checksum((uchar *)igmphdr, size/2);  // size = payload (given) + igmp_header
 	igmphdr->checksum = htons(cksum);
