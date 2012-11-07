@@ -9,6 +9,7 @@
 
 void IGMPProcessPacket(gpacket_t *in_pkt);
 void IGMPBroadcast();
+void IGMPSendQueryMessage(uchar *dst_ip, uchar *grp_ip, int size);
 
 typedef struct _igmp_pkt_hdr_t {
     //unsigned char VerType; //00010001(17) | 00010010(18) 4-bit - 4-bit
