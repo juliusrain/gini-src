@@ -198,17 +198,30 @@ void IGMPProcessReport(gpacket_t *in_pkt) {
     int ip_hdr_len = ip_pkt->ip_hdr_len * 4;
     igmp_pkt_hdr_t *igmp_hdr = (igmp_pkt_hdr_t *) ((uchar *) ip_pkt + ip_hdr_len);
     
-    char buffer[100];
-    printf("report came from: %s\n",IP2Dot(buffer,ip_pkt->ip_src));
+    //char buffer[100];
+    //printf("report came from: %s\n",IP2Dot(buffer,ip_pkt->ip_src));
     
     
-    printf("report group: %s\n", IP2Dot(buffer, igmp_hdr->grp_addr));
+    //printf("report group: %s\n", IP2Dot(buffer, igmp_hdr->grp_addr));
     
     //add to table
-    igmp_table_entry_t *new_table_entry = createIGMPGroupEntry(igmp_hdr->grp_addr);
+    uchar group_address[4];
+    group_address[0] = igmp_hdr->grp_addr[3];
+    group_address[1] = igmp_hdr->grp_addr[2];
+    group_address[2] = igmp_hdr->grp_addr[1];
+    group_address[3] = igmp_hdr->grp_addr[0];
+    char buffer[100];
+    printf("group addr reverse: %s\n", IP2Dot(buffer, group_address));
+    igmp_table_entry_t *new_table_entry = createIGMPGroupEntry(group_address);
     igmp_route_tbl = addMCastGroup(igmp_route_tbl, new_table_entry);
+    
+    uchar ip_src[4];
+    ip_src[0] = ip_pkt->ip_src[3];
+    ip_src[1] = ip_pkt->ip_src[2];
+    ip_src[2] = ip_pkt->ip_src[1];
+    ip_src[3] = ip_pkt->ip_src[0];
      
-    igmp_host_entry_t *new_host = createIGMPHostEntry(ip_pkt->ip_src);
+    igmp_host_entry_t *new_host = createIGMPHostEntry(ip_src);
     addHostToGroup(igmp_route_tbl, new_table_entry, new_host);
     
    
