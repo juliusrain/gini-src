@@ -13,6 +13,7 @@
 #include "igmp.h"
 #include <stdio.h>
 #include <stdlib.h>
+extern igmp_table_entry_t *igmp_route_tbl;
 
 igmp_table_entry_t *createIGMPGroupEntry(uchar gr_addr[]) {
     igmp_table_entry_t *t_entry = (igmp_table_entry_t *)malloc(sizeof(igmp_table_entry_t));
@@ -175,8 +176,7 @@ void IGMPProcessPacket(gpacket_t *in_pkt)
     
     printf("igmp type: %d\n", igmp_hdr->type);
     printf("igmp version: %d\n", igmp_hdr->version);
-    printf("igmp unused: %c\n", igmp_hdr->unused);
-    printf("igmp unused: %d\n", igmp_hdr->checksum);
+    
     switch (igmp_hdr->type) {
     
     case IGMP_REPORT:
@@ -187,13 +187,32 @@ void IGMPProcessPacket(gpacket_t *in_pkt)
     
     case IGMP_QUERY:
         printf("got a query\n");
+        
     	break;
     }
 }
 
 
 void IGMPProcessReport(gpacket_t *in_pkt) {
-
+    ip_packet_t *ip_pkt = (ip_packet_t*) in_pkt->data.data;
+    int ip_hdr_len = ip_pkt->ip_hdr_len * 4;
+    igmp_pkt_hdr_t *igmp_hdr = (igmp_pkt_hdr_t *) ((uchar *) ip_pkt + ip_hdr_len);
+    
+    char buffer[100];
+    printf("report came from: %s\n",IP2Dot(buffer,ip_pkt->ip_src));
+    
+    
+    printf("report group: %s\n", IP2Dot(buffer, igmp_hdr->grp_addr));
+    
+    //add to table
+    igmp_table_entry_t *new_table_entry = createIGMPGroupEntry(igmp_hdr->grp_addr);
+    igmp_route_tbl = addMCastGroup(igmp_route_tbl, new_table_entry);
+     
+    igmp_host_entry_t *new_host = createIGMPHostEntry(ip_pkt->ip_src);
+    addHostToGroup(igmp_route_tbl, new_table_entry, new_host);
+    
+   
+    
 }
 
 //TODO: modify gpacket fields (model after ICMP example)
