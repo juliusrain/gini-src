@@ -428,17 +428,18 @@ int UDPProcess(gpacket_t *in_pkt)
 
         //create a group
         igmp_table_entry_t *t_entry = createIGMPGroupEntry(addr);
+        igmp_host_entry_t *h_entry = createIGMPHostEntry(addr2);
+
         igmp_table_entry_t *t_entry_two = createIGMPGroupEntry(host_addr);
+        igmp_host_entry_t *h_entry_two = createIGMPHostEntry(addr3);
 
         //create a host
-        igmp_host_entry_t *h_entry = createIGMPHostEntry(addr2);
-        igmp_host_entry_t *h_entry_two = createIGMPHostEntry(addr3);
 
         //add groups
         igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry);
-        igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry_two);
-
         addHostToGroup(igmp_route_tbl, t_entry, h_entry);
+
+        igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry_two);
         addHostToGroup(igmp_route_tbl, t_entry, h_entry_two);
 
         printIGMPRouteTable(igmp_route_tbl);

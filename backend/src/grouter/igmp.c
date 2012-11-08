@@ -60,7 +60,7 @@ igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
     return tbl_head;
 }
 
-igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igmp_host_entry_t *new_host) {
+int *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igmp_host_entry_t *new_host) {
     igmp_table_entry_t *t_iterator;
     igmp_host_entry_t *hosts;
 
@@ -77,7 +77,7 @@ igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
                 t_iterator = t_iterator->next;
             } else {
                 //target group doesn't exist
-                return NULL;
+                return 1;
             }
         }
     }
@@ -95,7 +95,7 @@ igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
     while(hosts != NULL) {
         if(memcmp(hosts->host_addr, new_host->host_addr, sizeof(hosts->host_addr)) == 0) {
             verbose(1, "host already exists in group");
-            return NULL;
+            return 1;
         } else {
             if(hosts->next != NULL) {
                 hosts = hosts->next;
@@ -106,19 +106,24 @@ igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
     }
     hosts->next = new_host;
 
-//    return (igmp_host_entry_t *)hosts->next;
-    return NULL;
+    return 0;
 }
 
 igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group) {
     igmp_table_entry_t *iterator;
 
     iterator = tbl_head;
+
     while(iterator != NULL) {
         if(memcmp(iterator->group_addr, group->group_addr, sizeof(iterator->group_addr)) == 0) {
             return iterator->hosts;
+        } else {
+            if(iterator->next != NULL) {
+                iterator = iterator->next;
+            } else {
+                return NULL;
+            }
         }
-        iterator = iterator->next;
     }
     return NULL;
 }
