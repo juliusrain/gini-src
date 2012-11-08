@@ -29,7 +29,9 @@ igmp_host_entry_t *createIGMPHostEntry(uchar h_addr[]) {
     h_entry->next = NULL;
 }
 
-igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *new_entry) {
+igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]) {
+
+    igmp_table_entry_t *new_entry = createIGMPGroupEntry(gr_addr);
 
     verbose(1, "[addMCastGroup]:: Adding multicast group to IGMP table");
     igmp_table_entry_t *iterator;
@@ -47,6 +49,7 @@ igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
         if(memcmp(iterator->group_addr, new_entry->group_addr, sizeof(iterator->group_addr)) == 0) {
             //already exists so return with already existing entry
             verbose(1, "[addMCastGroup]:: Entry already exists");
+            free(new_entry);
             return tbl_head;
         } else {
             if(iterator->next != NULL) {
@@ -61,16 +64,22 @@ igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
     return tbl_head;
 }
 
-int *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igmp_host_entry_t *new_host) {
+int deleteMCastGroup(igmp_table_entry_t *tbl_head, unsigned char target[]) {
+
+}
+
+int addHostToGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[], unsigned char h_addr[]) {
     igmp_table_entry_t *t_iterator;
     igmp_host_entry_t *hosts;
+
+    igmp_host_entry_t *new_host = createIGMPHostEntry(h_addr);
 
     t_iterator = tbl_head;
 
     //find target group
     while(t_iterator != NULL) {
-        if(memcmp(t_iterator->group_addr, group->group_addr, sizeof(t_iterator->group_addr)) == 0) {
-            unsigned char buffer[10];
+        if(memcmp(t_iterator->group_addr, gr_addr, sizeof(t_iterator->group_addr)) == 0) {
+            unsigned char buffer[40];
             verbose(1, "found target group %s\n", IP2Dot(buffer, t_iterator->group_addr));
             break;
         } else {
@@ -78,6 +87,7 @@ int *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igm
                 t_iterator = t_iterator->next;
             } else {
                 //target group doesn't exist
+                free(new_host);
                 return 1;
             }
         }
@@ -87,7 +97,7 @@ int *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igm
     if(t_iterator->hosts == NULL) {
         t_iterator->hosts = new_host;
         verbose(1, "no hosts, adding host");
-        return t_iterator->hosts;
+        return 0;
     } else {
         verbose(1, "has hosts, setting host iterator");
         hosts = t_iterator->hosts;
@@ -96,6 +106,7 @@ int *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igm
     while(hosts != NULL) {
         if(memcmp(hosts->host_addr, new_host->host_addr, sizeof(hosts->host_addr)) == 0) {
             verbose(1, "host already exists in group");
+            free(new_host);
             return 1;
         } else {
             if(hosts->next != NULL) {
@@ -110,13 +121,13 @@ int *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igm
     return 0;
 }
 
-igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group) {
+igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]) {
     igmp_table_entry_t *iterator;
 
     iterator = tbl_head;
 
     while(iterator != NULL) {
-        if(memcmp(iterator->group_addr, group->group_addr, sizeof(iterator->group_addr)) == 0) {
+        if(memcmp(iterator->group_addr, gr_addr, sizeof(iterator->group_addr)) == 0) {
             return iterator->hosts;
         } else {
             if(iterator->next != NULL) {
@@ -212,8 +223,8 @@ void IGMPProcessReport(gpacket_t *in_pkt) {
     group_address[3] = igmp_hdr->grp_addr[0];
     char buffer[100];
     printf("group addr reverse: %s\n", IP2Dot(buffer, group_address));
-    igmp_table_entry_t *new_table_entry = createIGMPGroupEntry(group_address);
-    igmp_route_tbl = addMCastGroup(igmp_route_tbl, new_table_entry);
+    //igmp_table_entry_t *new_table_entry = createIGMPGroupEntry(group_address);
+    igmp_route_tbl = addMCastGroup(igmp_route_tbl, group_address);
     
     uchar ip_src[4];
     ip_src[0] = ip_pkt->ip_src[3];
@@ -221,8 +232,8 @@ void IGMPProcessReport(gpacket_t *in_pkt) {
     ip_src[2] = ip_pkt->ip_src[1];
     ip_src[3] = ip_pkt->ip_src[0];
      
-    igmp_host_entry_t *new_host = createIGMPHostEntry(ip_src);
-    addHostToGroup(igmp_route_tbl, new_table_entry, new_host);
+    //igmp_host_entry_t *new_host = createIGMPHostEntry(ip_src);
+    addHostToGroup(igmp_route_tbl, group_address, ip_src);
     
    
     

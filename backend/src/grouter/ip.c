@@ -391,7 +391,7 @@ int IPProcessMyPacket(gpacket_t *in_pkt)
 int UDPProcess(gpacket_t *in_pkt)
 {
     verbose(2, "[UDPProcess]:: packet received for processing.. NOT YET IMPLEMENTED!! ");
-     char buffer[100];
+    char buffer[100];
     ip_packet_t *ip_pkt = (ip_packet_t *)in_pkt->data.data;
 
     //process udp packet meant for multicast sts
@@ -399,34 +399,57 @@ int UDPProcess(gpacket_t *in_pkt)
         verbose(1, "[UDPProcess]:: Processing UDP packet with multicast information.");
 
         //query table, generate packets to send to interested hosts
-   
-    
-    printIGMPRouteTable(igmp_route_tbl);
-    uchar group_address[4];
-    group_address[0] = ip_pkt->ip_dst[3];
-    group_address[1] = ip_pkt->ip_dst[2];
-    group_address[2] = ip_pkt->ip_dst[1];
-    group_address[3] = ip_pkt->ip_dst[0];
 
-    igmp_table_entry_t *dummy_group = createIGMPGroupEntry(group_address);
+//        uchar a1[4];
+//        a1[0]=1; a1[1]=2; a1[2]=3; a1[3]=4;
+//        uchar a2[4];
+//        a2[0]=5; a2[1]=6; a2[2]=7; a2[3]=8;
+//        uchar a3[4];
+//        a3[0]=9; a3[1]=10; a3[2]=11; a3[3]=12;
+//        uchar a4[4];
+//        a4[0]=13; a4[1]=14; a4[2]=15; a4[3]=16;
+//        uchar a5[4];
+//        a5[0]=17; a5[1]=18; a5[2]=19; a5[3]=20;
+//        uchar a6[4];
+//        a6[0]=21; a6[1]=22; a6[2]=23; a6[3]=24;
+//
+//        igmp_route_tbl = addMCastGroup(igmp_route_tbl, a1);
+//        addHostToGroup(igmp_route_tbl, a1, a2);
+//
+//        igmp_route_tbl = addMCastGroup(igmp_route_tbl, a3);
+//        addHostToGroup(igmp_route_tbl, a3, a4);
+//
+//        igmp_route_tbl = addMCastGroup(igmp_route_tbl, a5);
+//        addHostToGroup(igmp_route_tbl, a5, a6);
+
+        printIGMPRouteTable(igmp_route_tbl);
+        uchar group_address[4];
+        group_address[0] = ip_pkt->ip_dst[3];
+        group_address[1] = ip_pkt->ip_dst[2];
+        group_address[2] = ip_pkt->ip_dst[1];
+        group_address[3] = ip_pkt->ip_dst[0];
     
-    printf("incoming group addr: %s\n", IP2Dot(buffer, group_address));
-    
-    igmp_host_entry_t *head = getHostsInGroup(igmp_route_tbl, dummy_group);
-    if (head == NULL) {
-        printf("EMPTY GROUP\n");
-        return EXIT_SUCCESS;
-      }
-    int s = sizeof(in_pkt);
-  
-    while (head != NULL) {
+//        igmp_table_entry_t *dummy_group = createIGMPGroupEntry(group_address);
         
-        printf("sending to %s\n", IP2Dot(buffer, head->host_addr));
-        IPOutgoingPacket(in_pkt, head->host_addr, s, 1, UDP_PROTOCOL);
-        if (head->next == NULL)
-            break;
-        head = head->next;    
-    }
+        printf("incoming group addr: %s\n", IP2Dot(buffer, group_address));
+        
+//        igmp_host_entry_t *head = getHostsInGroup(igmp_route_tbl, dummy_group);
+        igmp_host_entry_t *head = getHostsInGroup(igmp_route_tbl, group_address);
+        if (head == NULL) {
+            printf("EMPTY GROUP\n");
+            return EXIT_SUCCESS;
+        }
+        int s = sizeof(in_pkt);
+      
+        while (head != NULL) {
+            
+            printf("sending to %s\n", IP2Dot(buffer, head->host_addr));
+            IPOutgoingPacket(in_pkt, head->host_addr, s, 1, UDP_PROTOCOL);
+            if (head->next == NULL) {
+                break;
+            }
+            head = head->next;    
+        }
     }
     return EXIT_SUCCESS;
 }
