@@ -154,16 +154,27 @@ void IGMPProcessPacket(gpacket_t *in_pkt)
     int ip_hdr_len = ip_pkt->ip_hdr_len * 4;
     igmp_pkt_hdr_t *igmp_hdr = (igmp_pkt_hdr_t *) ((uchar *) ip_pkt + ip_hdr_len);
     
+    printf("igmp type: %d\n", igmp_hdr->type);
+    printf("igmp version: %d\n", igmp_hdr->version);
+    printf("igmp unused: %c\n", igmp_hdr->unused);
+    printf("igmp unused: %d\n", igmp_hdr->checksum);
     switch (igmp_hdr->type) {
     
     case IGMP_REPORT:
+        printf("got report\n");
+        IGMPProcessReport(in_pkt);
 
         break;
     
     case IGMP_QUERY:
-
-        break;
+        printf("got a query\n");
+    	break;
     }
+}
+
+
+void IGMPProcessReport(gpacket_t *in_pkt) {
+
 }
 
 //TODO: modify gpacket fields (model after ICMP example)
