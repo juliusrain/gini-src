@@ -414,72 +414,34 @@ int UDPProcess(gpacket_t *in_pkt)
         host_addr[2] = 7;
         host_addr[3] = 8;
 
-    //create a group
-//    igmp_table_entry_t *t_entry = (igmp_table_entry_t *)malloc(sizeof(igmp_table_entry_t));
-//    memcpy(t_entry->group_addr, addr, sizeof(t_entry->group_addr));
+        uchar addr2[4];
+        addr2[0] = 15;
+        addr2[1] = 16;
+        addr2[2] = 17;
+        addr2[3] = 18;
 
-    //create another group
-//    igmp_table_entry_t *t_entry_two = (igmp_table_entry_t *)malloc(sizeof(igmp_table_entry_t));
-//    memcpy(t_entry_two->group_addr, host_addr, sizeof(t_entry_two->group_addr));
+        uchar addr3[4];
+        addr3[0] = 25;
+        addr3[1] = 26;
+        addr3[2] = 27;
+        addr3[3] = 28;
 
-    //create a host
-//    igmp_host_entry_t *h_entry = (igmp_host_entry_t *)malloc(sizeof(igmp_host_entry_t));
-//    memcpy(h_entry->host_addr, host_addr, sizeof(h_entry->host_addr));
+        //create a group
+        igmp_table_entry_t *t_entry = createIGMPGroupEntry(addr);
+        igmp_table_entry_t *t_entry_two = createIGMPGroupEntry(host_addr);
 
-    //add groups
-//    igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry);
-//    igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry_two);
-//    addHostToGroup(igmp_route_tbl, t_entry, h_entry);
+        //create a host
+        igmp_host_entry_t *h_entry = createIGMPHostEntry(addr2);
+        igmp_host_entry_t *h_entry_two = createIGMPHostEntry(addr3);
 
+        //add groups
+        igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry);
+        igmp_route_tbl = addMCastGroup(igmp_route_tbl, t_entry_two);
 
-    char buffer[MAX_TMPBUF_LEN];
-//    verbose(1, "gr addr %s\n", IP2Dot(buffer, igmp_route_tbl->group_addr));
-//    igmp_table_entry_t *temp = igmp_route_tbl->next;
-//    verbose(1, "gr2 addr %s\n", IP2Dot(buffer, temp->group_addr));
+        addHostToGroup(igmp_route_tbl, t_entry, h_entry);
+        addHostToGroup(igmp_route_tbl, t_entry, h_entry_two);
 
-    igmp_host_entry_t *h_entry_one = (igmp_host_entry_t *)malloc(sizeof(igmp_host_entry_t));
-    memcpy(h_entry_one->host_addr, host_addr, sizeof(h_entry_one->host_addr));
-
-    igmp_host_entry_t *h_entry_two = (igmp_host_entry_t *)malloc(sizeof(igmp_host_entry_t));
-    memcpy(h_entry_two->host_addr, addr, sizeof(h_entry_two->host_addr));
-    h_entry_two->next = NULL;
-
-    h_entry_one->next = h_entry_two;
-
-    //printIGMPRouteTable(igmp_route_tbl);
-
-    printHosts(h_entry_one);
-
-        //no entry found for target mc address so create table entry
-//        if(map_get(igmp_route_tbl, addr) == NULL) {
-//            verbose(1, "no entry");
-//            List *hosts_list;
-//            //create empty list for new entry
-//            if(!(hosts_list = list_create(free))) {
-//                verbose(1, "error creating list of hosts");
-//            }
-//            //add entry to table with empty list as value
-//            map_add(igmp_route_tbl, addr, hosts_list);
-//            //check if entry was successfully added
-//            if(map_get(igmp_route_tbl, addr) != NULL) {
-//                verbose(1, "found something");
-//                //add random entry in list for testing
-//                list_append(hosts_list, host_addr);
-//            }
-//
-//            Lister *lister;
-//            if(!(lister = lister_create(hosts_list))) {
-//                verbose(1, "error making lister");
-//            }
-//            while(lister_has_next(lister) == 1) {
-//                verbose(1, "bjkdfl;jgkfl %s", (uchar)list_next(hosts_list));
-//            }
-//            lister_destroy(&lister);
-//
-//        } else {
-//            List *hosts = map_get(igmp_route_tbl, addr);
-//
-//        }
+        printIGMPRouteTable(igmp_route_tbl);
 
 
     }

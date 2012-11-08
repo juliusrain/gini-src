@@ -14,13 +14,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+igmp_table_entry_t *createIGMPGroupEntry(uchar gr_addr[]) {
+    igmp_table_entry_t *t_entry = (igmp_table_entry_t *)malloc(sizeof(igmp_table_entry_t));
+    memcpy(t_entry->group_addr, gr_addr, sizeof(t_entry->group_addr));
+    t_entry->next = NULL;
+    t_entry->hosts = NULL;
+    
+}
+
+igmp_host_entry_t *createIGMPHostEntry(uchar h_addr[]) {
+    igmp_host_entry_t *h_entry = (igmp_host_entry_t *)malloc(sizeof(igmp_host_entry_t));
+    memcpy(h_entry->host_addr, h_addr, sizeof(h_entry->host_addr));
+    h_entry->next = NULL;
+}
+
 igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *new_entry) {
 
     verbose(1, "[addMCastGroup]:: Adding multicast group to IGMP table");
     igmp_table_entry_t *iterator;
 
     iterator = tbl_head;
-
+    new_entry->next = NULL;
 
     //head was null so create new mcast group and return it;
     if(iterator == NULL) {
@@ -52,19 +66,20 @@ igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
 
     t_iterator = tbl_head;
 
+    //find target group
     while(t_iterator != NULL) {
         if(memcmp(t_iterator->group_addr, group->group_addr, sizeof(t_iterator->group_addr)) == 0) {
             unsigned char buffer[10];
             verbose(1, "found target group %s\n", IP2Dot(buffer, t_iterator->group_addr));
             break;
+        } else {
+            if(t_iterator->next != NULL) {
+                t_iterator = t_iterator->next;
+            } else {
+                //target group doesn't exist
+                return NULL;
+            }
         }
-        t_iterator = (igmp_table_entry_t *)(t_iterator->next);
-        //target group doesn't exist, so return null;
-        if(t_iterator == NULL) return NULL;
-    }
-
-    if(t_iterator->hosts == NULL) {
-        verbose(1, "grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
     }
 
     //group exists but has no hosts;
@@ -73,12 +88,12 @@ igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry
         verbose(1, "no hosts, adding host");
         return t_iterator->hosts;
     } else {
-        verbose(1, "setting host iterator");
+        verbose(1, "has hosts, setting host iterator");
         hosts = t_iterator->hosts;
     }
 
     while(hosts != NULL) {
-        if(memcmp(hosts->host_addr, new_host->host_addr, sizeof(hosts->host_addr))) {
+        if(memcmp(hosts->host_addr, new_host->host_addr, sizeof(hosts->host_addr)) == 0) {
             verbose(1, "host already exists in group");
             return NULL;
         } else {
@@ -113,8 +128,10 @@ void printHosts(igmp_host_entry_t *host_head) {
     igmp_host_entry_t *h_iterator;
     h_iterator = host_head;
 
+    if(host_head == NULL) return;
+
     while(h_iterator != NULL) {
-        verbose(1, "IGMP entry:: Host: %s\n", IP2Dot(buf, h_iterator->host_addr));
+        verbose(1, "\tIGMP entry:: Host: %s", IP2Dot(buf, h_iterator->host_addr));
         if(h_iterator->next != NULL) {
             h_iterator = h_iterator->next;
         } else {
@@ -133,13 +150,10 @@ void printIGMPRouteTable(igmp_table_entry_t *tbl_head) {
     if(t_iterator == NULL) return;
 
     while(t_iterator != NULL) {
-        verbose(1, "grrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr");
-        if(t_iterator->hosts == NULL) {
-            verbose(1, "IGMP entry:: Group: %s - NONE\n", IP2Dot(buf, t_iterator->group_addr));
-        } else {
-            h_iterator = t_iterator->hosts;
-            verbose(1,"fgjh");
-        }
+        verbose(1, "IGMP entry:: Group: %s", IP2Dot(buf, t_iterator->group_addr));
+
+        printHosts(t_iterator->hosts);
+
         if(t_iterator->next != NULL) {
             t_iterator = t_iterator->next;
         } else {
