@@ -44,6 +44,8 @@ typedef struct _igmp_pkt_hdr_t {
 igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *new_group);
 igmp_host_entry_t *addHostToGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group, igmp_host_entry_t *new_host);
 igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, igmp_table_entry_t *group);
+igmp_table_entry_t *createIGMPGroupEntry(unsigned char group_addr[]);
+igmp_host_entry_t *createIGMPHostEntry(unsigned char host_addr[]);
 void printHosts(igmp_host_entry_t *host_head);
 void printIGMPRouteTable(igmp_table_entry_t *tbl_head);
 void IGMPProcessPacket(gpacket_t *in_pkt);
