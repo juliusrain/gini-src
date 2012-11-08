@@ -125,7 +125,7 @@ void* fromEthernetDev(void *arg)
 			(COMPARE_MAC(in_pkt->data.header.dst, bcast_mac) != 0) &&
 			IS_MCAST_MAC(in_pkt->data.header.dst, mcast_first_byte) != 0)
 		{
-		    printGPktFrame(in_pkt, "huy");
+		    //printGPktFrame(in_pkt, "huy");
 			verbose(1, "[fromEthernetDev]:: Packet dropped .. not for this router!? ");
 			free(in_pkt);
 			continue;
