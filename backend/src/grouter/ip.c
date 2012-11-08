@@ -368,6 +368,7 @@ int IPProcessMyPacket(gpacket_t *in_pkt)
         {
             IGMPProcessPacket(in_pkt);
             verbose(1, "PROCESSING IGMP PACKET YAAAAAAAY");
+            printIGMPRouteTable(igmp_route_tbl);
             return EXIT_SUCCESS;
         }
 

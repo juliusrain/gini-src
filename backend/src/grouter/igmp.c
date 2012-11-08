@@ -13,6 +13,7 @@
 #include "igmp.h"
 #include <stdio.h>
 #include <stdlib.h>
+extern igmp_table_entry_t *igmp_route_tbl;
 
 igmp_table_entry_t *createIGMPGroupEntry(uchar gr_addr[]) {
     igmp_table_entry_t *t_entry = (igmp_table_entry_t *)malloc(sizeof(igmp_table_entry_t));
@@ -199,7 +200,13 @@ void IGMPProcessReport(gpacket_t *in_pkt) {
     printf("report group: %s\n", IP2Dot(buffer, igmp_hdr->grp_addr));
     
     //add to table
+    igmp_table_entry_t *new_table_entry = createIGMPGroupEntry(igmp_hdr->grp_addr);
+    igmp_route_tbl = addMCastGroup(igmp_route_tbl, new_table_entry);
+     
+    igmp_host_entry_t *new_host = createIGMPHostEntry(ip_pkt->ip_src);
+    addHostToGroup(igmp_route_tbl, new_table_entry, new_host);
     
+   
     
 }
 
