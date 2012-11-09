@@ -401,35 +401,19 @@ int UDPProcess(gpacket_t *in_pkt)
     if(isMCastIP(ip_pkt->ip_dst) == 0) {
         verbose(1, "[UDPProcess]:: Processing UDP packet with multicast information.");
 
+		uchar group_address[4];
+		group_address[0] = ip_pkt->ip_dst[3];
+		group_address[1] = ip_pkt->ip_dst[2];
+		group_address[2] = ip_pkt->ip_dst[1];
+		group_address[3] = ip_pkt->ip_dst[0];
+
+
         buffer[0] = 3;
         buffer[1] = 2;
         buffer[2] = 168;
         buffer[3] = 192;
 
-        //printf("Success or not: %d\n", findRouteEntry(route_tbl, buffer, zeroes, &face));
 
-        //printf("!!!DESTINATION!!! %d\n", face);
-
-        //IPSend2Output(in_pkt);
-        //printGPktFrame(in_pkt, "bvfhjdklvhfk");
-        //printf("supposed destination interface: %d\n", in_pkt->frame.dst_interface);
-        //in_pkt->frame.dst_interface = 2;
-        ////memcpy(in_pkt->frame.nxth_ip_addr, buffer, 4);
-        //in_pkt->frame.nxth_ip_addr[0] = buffer[0];
-        //in_pkt->frame.nxth_ip_addr[1] = buffer[1];
-        //in_pkt->frame.nxth_ip_addr[2] = buffer[2];
-        //in_pkt->frame.nxth_ip_addr[3] = buffer[3];
-        //printGPktFrame(in_pkt, "bvfhjdklvhfk");
-        ////printGPacket(in_pkt, 3, "bvfhjdklvhfk");
-        //IPSend2Output(in_pkt);
-
-
-        //printIGMPRouteTable(igmp_route_tbl);
-        uchar group_address[4];
-        group_address[0] = ip_pkt->ip_dst[3];
-        group_address[1] = ip_pkt->ip_dst[2];
-        group_address[2] = ip_pkt->ip_dst[1];
-        group_address[3] = ip_pkt->ip_dst[0];
 
         printf("incoming group addr: %s\n", IP2Dot(buffer, group_address));
 
@@ -442,17 +426,27 @@ int UDPProcess(gpacket_t *in_pkt)
         while (head != NULL) {
             printf("sending to %s\n", IP2Dot(buffer, head->host_addr));
 
-            gpacket_t *copy = (gpacket_t *) malloc(sizeof(gpacket_t));
-            memcpy(copy, in_pkt, sizeof(copy));
+			gpacket_t *in_pkt_copy = (gpacket_t *)malloc(sizeof(gpacket_t));
+			pkt_data_t data_copy;
+			pkt_frame_t frame_copy;
 
-            copy->frame.nxth_ip_addr[0] = head->host_addr[0];
-            copy->frame.nxth_ip_addr[1] = head->host_addr[1];
-            copy->frame.nxth_ip_addr[2] = head->host_addr[2];
-            copy->frame.nxth_ip_addr[3] = head->host_addr[3];
+			memcpy(in_pkt_copy, in_pkt, sizeof(gpacket_t));
+			memcpy(&data_copy, &(in_pkt->data), sizeof(in_pkt->data));
+			memcpy(&frame_copy, &(in_pkt->frame), sizeof(in_pkt->frame));
 
-            findRouteEntry(route_tbl, head->host_addr, zeroes, &copy->frame.dst_interface);
+			in_pkt_copy->data = data_copy;
+			in_pkt_copy->frame = frame_copy;
 
-            IPSend2Output(copy);
+            in_pkt_copy->frame.nxth_ip_addr[0] = head->host_addr[0];
+            in_pkt_copy->frame.nxth_ip_addr[1] = head->host_addr[1];
+            in_pkt_copy->frame.nxth_ip_addr[2] = head->host_addr[2];
+            in_pkt_copy->frame.nxth_ip_addr[3] = head->host_addr[3];
+
+            findRouteEntry(route_tbl, head->host_addr, zeroes, &in_pkt_copy->frame.dst_interface);
+
+			printGPacket(in_pkt_copy, 3, "hgkdjfslhgjkdsghfds");
+
+            IPSend2Output(in_pkt_copy);
 
             if (head->next == NULL) {
                 break;
