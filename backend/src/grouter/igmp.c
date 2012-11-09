@@ -20,7 +20,6 @@ igmp_table_entry_t *createIGMPGroupEntry(uchar gr_addr[]) {
     memcpy(t_entry->group_addr, gr_addr, sizeof(t_entry->group_addr));
     t_entry->next = NULL;
     t_entry->hosts = NULL;
-    
 }
 
 igmp_host_entry_t *createIGMPHostEntry(uchar h_addr[]) {
@@ -37,7 +36,6 @@ igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, unsigned char gr
     igmp_table_entry_t *iterator;
 
     iterator = tbl_head;
-    new_entry->next = NULL;
 
     //head was null so create new mcast group and return it;
     if(iterator == NULL) {
@@ -64,7 +62,74 @@ igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, unsigned char gr
     return tbl_head;
 }
 
-int deleteMCastGroup(igmp_table_entry_t *tbl_head, unsigned char target[]) {
+igmp_table_entry_t *deleteMCastGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]) {
+    igmp_table_entry_t *t_iterator;
+    igmp_table_entry_t *t_prev;
+
+    igmp_host_entry_t *h_iterator;
+    igmp_host_entry_t *h_temp;
+
+    t_iterator = igmp_route_tbl;
+    t_prev = t_iterator;
+
+    //check firs entry
+    if(memcmp(t_iterator->group_addr, gr_addr, sizeof(t_iterator->group_addr)) == 0) {
+        if(t_iterator->next != NULL) {
+            t_prev = t_iterator->next;
+            free(t_iterator);
+            igmp_route_tbl = t_prev;
+            return 1;
+        } else {
+            free(t_iterator);
+            t_prev = NULL;
+            igmp_route_tbl = t_prev;
+            return 1;
+        }
+    }
+
+    //find target group from rest
+    while(t_iterator != NULL) {
+        if(memcmp(t_iterator->group_addr, gr_addr, sizeof(t_iterator->group_addr)) == 0) {
+            unsigned char buffer[40];
+            break;
+        } else {
+            if(t_iterator->next != NULL) {
+                t_prev = t_iterator;
+                t_iterator = t_iterator->next;
+            } else {
+                //target group doesn't exist
+                return 1;
+            }
+        }
+    }
+
+
+    if(t_iterator->next == NULL) {
+        t_prev->next = NULL;
+    } else {
+        t_prev->next = t_iterator->next;
+    }
+
+    if(t_iterator->hosts == NULL) {
+        verbose(1, "no hosts to delete");
+        h_iterator = NULL;
+    } else {
+        verbose(1, "deleting hosts");
+        h_iterator = t_iterator->hosts;
+    }
+
+//    while(h_iterator != NULL) {
+//        h_temp = h_iterator;
+//        if(h_iterator->next != NULL) {
+//            h_iterator = h_iterator->next;
+//        }
+//        free(h_temp);
+//        h_temp = NULL;
+//    }
+
+    free(t_iterator);
+
+    return 0;
 
 }
 

@@ -22,11 +22,13 @@
 typedef struct _igmp_host_entry_t {
     unsigned char host_addr[4];
     struct igmp_host_entry_t *next;
+    struct igmp_host_entry_t *prev;
 } igmp_host_entry_t;
 
 typedef struct _igmp_table_entry_t {
     unsigned char group_addr[4];
     struct igmp_table_entry_t *next;
+    struct igmp_table_entry_t *prev;
     igmp_host_entry_t *hosts;
 } igmp_table_entry_t;
 
@@ -41,7 +43,7 @@ typedef struct _igmp_pkt_hdr_t {
 } igmp_pkt_hdr_t;
 
 igmp_table_entry_t *addMCastGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]);
-int deleteMCastGroup(igmp_table_entry_t *tbl_head, unsigned char target[]);
+igmp_table_entry_t *deleteMCastGroup(igmp_table_entry_t *tbl_head, unsigned char target[]);
 int addHostToGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[], unsigned char h_addr[]);
 igmp_host_entry_t *getHostsInGroup(igmp_table_entry_t *tbl_head, unsigned char gr_addr[]);
 igmp_table_entry_t *createIGMPGroupEntry(unsigned char group_addr[]);
